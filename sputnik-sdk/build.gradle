@@ -1,0 +1,158 @@
+import com.ulabs.gradle.MakefileTask
+import com.ulabs.gradle.InstallNameToolTask
+import com.ulabs.gradle.VersionTask
+import org.gradle.internal.os.OperatingSystem
+
+project(":sputnik-sdk") {
+    apply plugin: 'cpp'
+    model {
+        components {
+            sputnik(NativeLibrarySpec) {
+                sources {
+                    cpp {
+                        lib project: ":google", library: 'google', linkage: 'api'
+                        lib project: ":libxml2", library: 'libxml2', linkage: 'shared'
+                        lib project: ":sqlite", library: 'libsqlite', linkage: 'shared'
+                        lib project: ":boost", library: 'libboost', linkage: 'api'
+                        lib project: ":boost", library: 'libboost_filesystem', linkage: 'static'
+                        lib project: ":boost", library: 'libboost_system', linkage: 'static'
+                        lib project: ":openssl", library: 'libcrypto', linkage: 'static'
+                        lib project: ":openssl", library: 'libssl', linkage: 'static'
+                        source {
+                            srcDir "src"
+                            include "*/*.cpp"
+                        }
+                        exportedHeaders {
+                            srcDir "include"
+                        }
+                    }
+                }
+                binaries.withType(SharedLibraryBinarySpec) {
+                    if (toolChain in [Gcc, Clang]) {
+                        cCompiler.args "-shared"
+                    }
+                }
+                binaries.withType(StaticLibraryBinarySpec) {
+                    tasks.withType(CppCompile) {
+                        enabled = false
+                    }
+                }
+                binaries.all {
+                    tasks.withType(CppCompile) {
+                        dependsOn "setVersion", ":sqlite:build", ":libxml2:build", ":google:build",":boost:build", ":openssl:build"
+                    }
+                    linker.args "-lm"
+                    cppCompiler.args "-std=c++11"
+                    if(project.isCrossBuilding()) {
+                        cppCompiler.args "-DANDROID"
+                        linker.args "-llog"
+                    }
+                }
+            }
+        }
+    }
+
+    project.ext.libsPath = {
+        return commonLibsPath()
+    }
+
+    project.ext.ldFlags = {
+        return "-L${libsPath()} -lsputnik"
+    }
+
+    task qmakeTask() {
+        doLast {
+            // patch Test.pro to set include path and lib path
+            File proFile = new File(testDir(), "Test.pro")
+            String fileContents = proFile.text
+            String replaced = fileContents.replaceAll(~/#commonIncludePath/, commonIncludePath())
+            replaced = replaced.replaceAll(~/#commonLibsPath/, commonLibsPath())
+            proFile.delete()
+            proFile << replaced
+            // run qmake
+            exec {
+                executable "qmake"
+                args "Test.pro"
+                workingDir testDir()
+            }
+            exec {
+                executable "make"
+                workingDir testDir()
+            }
+        }
+    }
+
+    task test(dependsOn:qmakeTask) {
+        doLast {
+            exec {
+                executable "./Test"
+                workingDir testDir()
+            } 
+        }
+    }
+
+    task setVersion(type:VersionTask) {
+        Properties props = project.ext.versionProps()
+        File vFile = new File(projectDir, ["include", "UrbanLabs", "Sdk", "Platform", "LibSputnikVersion.h"].join(File.separator))
+        String revId = project.ext.latestRevisionId()
+        
+        def vDefines = [SPUTNIK_VERSION_STRING:props.getProperty('sdk.major.version'),
+                        SPUTNIK_REVISION_ID:revId,
+                        SPUTNIK_SOURCE_ID:new Date().format("yyyy-MM-dd HH:mm:ss.S")]
+
+        versionFile vFile
+        defines vDefines
+    }
+
+    ext.updateConfig = {
+        String sqlCommands = "CREATE TABLE config(id INT, tag NVARCHAR(256), value NVARCHAR(256));\n" + 
+                             ".separator \"|\" \n" +
+                             ".import sputnik.config.text config\n"
+        File sql = new File(project.rootProject.projectDir, ["resources", "config","config.sql"].join(File.separator))
+        File sputnikConfigFile = new File(project.rootProject.projectDir, ["resources", "config","sputnik.config"].join(File.separator))
+        if(sputnikConfigFile.exists())
+            sputnikConfigFile.delete()
+        if(sql.exists())
+            sql.delete()
+        sql << sqlCommands
+        def out = project.getCommandOutput(["sqlite3", "${sputnikConfigFile.toString()}", "-init", "${sql.toString()}"], 
+            new File(project.rootProject.projectDir, ["resources", "config"].join(File.separator)).toString(),[:])
+        sql.delete()
+    }
+
+    task buildSdk() {
+        doLast {
+            updateConfig()
+            def distDir = new File(libsPath())
+            String binDir =
+                ["${project.buildDir}", "binaries","sputnikSharedLibrary"].join(File.separator)
+            FileTree tree = fileTree(binDir) {
+                include 'libsputnik*'
+            }
+            tree.each {File file ->
+                copy {
+                   from file.toString()
+                   into distDir.toString()
+                }
+            }
+            // copy headers
+            copy {
+                from "include"
+                into commonIncludePath()
+            }
+        }
+    }
+
+    if(!project.isCrossBuilding() && OperatingSystem.current().isMacOsX()) {
+        task installNameToolTask(type: InstallNameToolTask, dependsOn: buildSdk) {
+            def libNames = ["libsputnik"] 
+            libsToOverride libNames
+        }
+
+        build.dependsOn(installNameToolTask)
+        installNameToolTask.dependsOn(assemble)
+    } else {
+        build.dependsOn(buildSdk)
+        buildSdk.dependsOn(assemble)
+    }
+}

@@ -1,0 +1,191 @@
+import com.ulabs.gradle.ReleaseBinaryTask
+import org.gradle.internal.os.OperatingSystem
+import com.ulabs.gradle.InstallNameToolTask
+import com.ulabs.gradle.VersionTask
+import de.undercouch.gradle.tasks.download.Download
+
+project(":parser") {
+    apply plugin: 'cpp'
+    model {
+        buildTypes {
+            release
+        }
+        components {
+            parser(NativeExecutableSpec) {
+                sources {
+                    cpp {
+                        lib project: ":google", library: 'google', linkage: 'api'
+                        lib project: ":osmium", library: 'osmium', linkage: 'api'
+                        lib project: ":sputnik-sdk", library: 'sputnik', linkage: 'shared'
+                        lib project: ":spatialindex", library: 'libspatialindex', linkage: 'shared'
+                        lib project: ":geos", library: 'libgeos', linkage: 'shared'
+                        lib project: ":boost", library: 'libboost_program_options', linkage: 'static'
+                        lib project: ":boost", library: 'libboost_system', linkage: 'static'
+                        lib project: ":boost", library: 'libboost_filesystem', linkage: 'static'
+                        source {
+                            srcDir "."
+                            include "**/*.cpp"
+                        }
+                        exportedHeaders {
+                            srcDir "."
+                        }
+                    }
+                }
+                
+                binaries.all {
+                    tasks.withType(CppCompile) {
+                        dependsOn "setVersion", ":zlib:build",":sputnik-sdk:build", ":spatialindex:build", 
+                                    ":geos:build", ":boost:build", ":osmium:build"
+                    }
+                    cppCompiler.args "-std=c++11", "-I${commonIncludePath()}"
+                    // 
+                    linker.args  "-L${libsPath()}", 
+                                "-lgeos", "-lspatialindex", "-lz", "-pthread"
+
+                    if(OperatingSystem.current().isMacOsX()) {
+                        linker.args "-liconv"
+                    }
+                    if(OperatingSystem.current().isLinux()) {
+                        linker.args "-Wl,-rpath-link,${libsPath()}", "-Wl,--copy-dt-needed-entries"
+                    }
+
+                    if (buildType == buildTypes.release) {
+                        cppCompiler.args "-O2"
+                        cppCompiler.define "NDEBUG"
+                    }
+                }
+            }
+        }
+    }
+
+    def copyConfig = { intoDir ->
+        println "Copied config folder into ${intoDir.toString()}"
+        copy {
+            from(new File(resourcePath(), "config")) {
+                include 'sputnik.config'
+                include '*.xml'
+                include '*.key'
+            }
+            into new File(intoDir.toString(), "config")
+        }
+        copy {
+            from(new File(resourcePath(), 'parser.sh'))
+            into intoDir
+        }
+    }
+
+    task setVersion(type:VersionTask) {
+        Properties props = project.ext.versionProps()
+        File vFile = new File(projectDir, "ParserVersion.h")
+        String revId = project.ext.latestRevisionId()
+        
+        def vDefines = [PARSER_VERSION_STRING:props.getProperty('parser.major.version'),
+                        PARSER_REVISION_ID:revId,
+                        PARSER_SOURCE_ID:new Date().format("yyyy-MM-dd HH:mm:ss.S")]
+        versionFile vFile                 
+        defines vDefines
+    }
+
+    task buildParser() {
+        doLast {
+            def distDir = new File(binPath())
+            String binDir =  ["${project.buildDir}", "binaries","parserExecutable"].join(File.separator)
+            FileTree tree = fileTree(binDir) {
+                include 'parser'
+            }
+            tree.each {File file ->
+               copy {
+                   from file.toString()
+                   into distDir.toString()
+               }
+            }
+            copyConfig(distDir)
+        }
+    }
+
+    task releaseParser(type:ReleaseBinaryTask) {
+        File outputReleaseDir = new File(commonBuildPath(), project.ext.releasePath())
+        if(outputReleaseDir.exists())
+            println "Warning! ${outputReleaseDir} already exists"
+
+        def binariesToRelease = ["parser", "sqlite3"]
+        binariesForRelease binariesToRelease
+        binLocation binPath()
+        libsLocation libsPath()
+        outputPath outputReleaseDir.toString()
+        doLast {
+            copyConfig(new File(outputReleaseDir, "bin"))
+        }
+    }
+
+    task parseTestMaps() {
+        doLast {
+            def maps = [
+                        [FILE:"saarbruecken_germany.pbf",
+                        AREA_NAME:"Saarbruecken",
+                        COUNTRY_CODE:"DE"],
+                        [URL:"https://s3.amazonaws.com/metro-extracts.mapzen.com/prague_czech-republic.osm.pbf",
+                        AREA_NAME:"Prague",
+                        COUNTRY_CODE:"CZ"],
+                        [URL:"https://s3.amazonaws.com/metro-extracts.mapzen.com/saint-petersburg_russia.osm.pbf",
+                        AREA_NAME:"Saint-Petersburg",
+                        COUNTRY_CODE:"RU"],
+                        [URL:"https://s3.amazonaws.com/metro-extracts.mapzen.com/buenos-aires_argentina.osm.pbf",
+                        AREA_NAME:"Buenos Aires",
+                        COUNTRY_CODE:"AR"],
+                        [URL:"https://s3.amazonaws.com/metro-extracts.mapzen.com/strasbourg_france.osm.pbf",
+                        AREA_NAME:"Strasbourg",
+                        COUNTRY_CODE:"FR"]
+            ]
+            println "Downloading maps"
+            File downloadDir = new File(project.rootProject.projectDir, "parsed_maps")
+            downloadDir.mkdirs()
+            maps.each {
+                def props = it
+                String link
+                if(props.containsKey("URL")) {
+                    link = props["URL"]
+                } else {
+                    link = props["FILE"]
+                }
+                
+                // download {
+                //     src link
+                //     dest downloadDir
+                // }
+                String fName = link.split("/").last()
+                String mapName = fName.split("\\.")[0]
+                File parsedMap = new File(downloadDir, mapName)
+                if(parsedMap.exists())
+                    parsedMap.delete()
+                try {
+                    String areaName = "\"" + props["AREA_NAME"] + "\"" 
+                    exec {
+                        executable "${binPath()}/parser.sh"
+                        args fName, mapName, "--area-name", areaName, "--country-codes", 
+                             props["COUNTRY_CODE"],"--tiles", "--routing", "--search", "--turn-restrictions", 
+                             "--address-decoder", "--highway", "--debug"
+                        workingDir downloadDir
+                    }
+                } catch(Throwable t) {
+                    println t
+                }
+            }
+        }
+    }
+
+    // http://data.openstreetmapdata.com/water-polygons-split-3857.zip
+
+    if(OperatingSystem.current().isMacOsX()) {
+        task installNameToolTask(type: InstallNameToolTask, dependsOn: buildParser) {
+            def libNames = ["parser"] 
+            libsToOverride libNames
+        }
+
+        build.dependsOn(installNameToolTask)
+        installNameToolTask.dependsOn(assemble)
+    } else {
+        build.dependsOn(buildParser)
+        buildParser.dependsOn(assemble)
+    }
+}

@@ -1,0 +1,89 @@
+<configuration>
+	<property name="tagFilter">
+		<property name="fixedKeyValue" type="associativeArray">
+			<entry key="amenity">
+				<value>*</value>
+				<value>-bench</value>
+                <value>-recycling</value>
+                <value>-parking_entrance</value>
+                <value>-parking_space</value>
+			</entry>
+			<entry key="building">
+				<value>dormitory</value>
+				<value>hotel</value>
+                <value>commercial</value>
+                <value>industrial</value>
+                <value>retail</value>
+                <value>civic</value>
+                <value>hospital</value>
+			</entry>
+			<entry key="leisure">
+				<value>beach_resort</value>
+				<value>dance</value>
+                <value>ice_rink</value>
+                <value>park</value>
+                <value>playground</value>
+                <value>sports_centre</value>
+                <value>stadium</value>
+                <value>swimming_pool</value>
+                <value>track</value>
+                <value>water_park</value>
+			</entry>
+			<entry key="railway">
+				<value>halt</value>
+				<value>station</value>
+				<value>subway</value>
+                <value>subway_entrance</value>
+                <value>tram_stop</value>
+                <value>tram</value>
+			</entry>
+			<entry key="public_transport">
+				<value>*</value>
+			</entry>
+			<entry key="place">
+				<value>*</value>
+			</entry>
+			<entry key="shop">
+				<value>*</value>
+			</entry>
+			<entry key="tourism">
+				<value>*</value>
+			</entry>
+			<entry key="office">
+				<value>*</value>
+			</entry>
+			<entry key="sport">
+				<value>*</value>
+			</entry>
+			<entry key="highway">
+				<value>bus_stop</value>
+				<value>pedestrian</value>
+                <value>living_street</value>
+                <value>footway</value>
+                <value>steps</value>
+                <value>track</value>
+                <value>path</value>
+                <value>primary</value>
+				<value>secondary</value>
+                <value>secondary_link</value>
+                <value>tertiary</value>
+                <value>tertiary_link</value>
+                <value>unclassified</value>
+                <value>residential</value>
+                <value>road</value>
+                <value>service</value>
+                <value>motorway</value>
+                <value>motorway_link</value>
+				<value>trunk</value>
+                <value>trunk_link</value>
+                <value>primary_link</value>
+			</entry>
+			<entry key="wheelchair">
+				<value>*</value>
+			</entry>
+			<entry key="internet_access">
+				<value>*</value>
+			</entry>
+		</property>
+	</property>
+</configuration>

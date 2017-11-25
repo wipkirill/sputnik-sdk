@@ -1,0 +1,46 @@
+Server by UrbanLabs version 0.0.1
+
+This file describes UrbanLabs Server software. It provides simple searching, 
+tile rendering and routing JSON API to map database files created by the UrbanLabs
+Parser tool.
+
+The version 0.0.1 of the given software is a freely distributable developer edition 
+which can be used only for for review, demonstration and evaluation purposes.
+
+
+INSTALLATION INSTRUCTIONS
+
+Ubuntu 14.04 or higher
+You will need to install the following before running the Server:
+     sudo apt-get install libicu52
+The Server has a dependency from Mapnik 3. On Ubuntu one can easily add a nightly build ppa:
+     sudo add-apt-repository ppa:mapnik/nightly-trunk
+     sudo apt-get update
+     sudo apt-get install libmapnik
+
+You are ready to go for the Getting started section.
+
+Mac OS X
+     We are planning to port the product in next releases.
+
+The Server has this basic input syntax:
+     ./server.sh PORT
+     The Server will be listening to on the PORT.
+Other options include:
+     --v                          version
+     --debug                      increase logging
+
+
+Example usage:
+          ./server.sh 8080
+
+Put some output files of the Parser tool to the Server directory.
+Point your browser to
+     http://localhost:8080/index.html?mapname=<MapName>
+in order to load the <MapName> file. It should show you a webpage with a map and 
+search bar for simple search queries. For more complex examples use the Server documentation.
+
+CREDITS
+     * OpenStreetMap(c) community, http://wiki.openstreetmap.org/
+     * SQlite, http://www.sqlite.org/
+     * Mapnik, http://mapnik.org/

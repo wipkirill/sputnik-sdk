@@ -1,0 +1,204 @@
+import com.ulabs.gradle.InstallNameToolTask
+import org.gradle.internal.os.OperatingSystem
+import com.ulabs.gradle.ReleaseBinaryTask
+import com.ulabs.gradle.VersionTask
+
+project(":sputnik-server") {
+    apply plugin: 'cpp'
+    model {
+        components {
+            if(project.isCrossBuilding()) {
+                server(NativeLibrarySpec)
+            } else {
+                server(NativeExecutableSpec)
+            }
+            server.sources {
+                cpp {
+                    lib project: ':mapnik', library: 'libmapnik', linkage: 'shared'
+                    lib project: ':sputnik-sdk', library: 'sputnik', linkage: 'shared'
+                    lib project: ':madfish', library: 'madfish', linkage: 'static'
+                    lib project: ":icu", library: 'libicuuc', linkage: project(":icu").linkage()
+                    lib project: ":boost", library: 'libboost', linkage: 'api'
+                    lib project: ":boost", library: 'libboost_program_options', linkage: 'static'
+                    source {
+                        srcDir "."
+                        include "**/*.cpp"
+                        exclude "*tests*", "*resources*"
+                    }
+                    exportedHeaders {
+                        srcDir "."
+                        include "**/*.h"
+                    }
+                }
+            }
+            server.binaries.withType(StaticLibraryBinarySpec) {
+                tasks.withType(CppCompile) {
+                    enabled = false
+                }
+            }
+            server.binaries.all {
+                tasks.all {
+                    dependsOn "setVersion", ":sputnik-sdk:build", ":madfish:build", ":mapnik:build" ,":boost:build"
+                }
+                linker.args "-L${libsPath()}", "-lm", "-pthread"
+                if(project.isCrossBuilding()) {
+                    cppCompiler.args "-DANDROID"
+                    linker.args "-ljnigraphics"
+                } else {
+                    if(OperatingSystem.current().isLinux()) {
+                        linker.args "-Wl,-rpath-link,${libsPath()}", "-Wl,--copy-dt-needed-entries"
+                    }
+                }
+
+                cppCompiler.args "-std=c++11", "-pthread", "-I${commonIncludePath()}"
+            }
+        }
+    }
+
+    def copyConfig = { intoDir ->
+        if(project.isCrossBuilding()) {
+
+        } else {
+            copy {
+                from(new File(resourcePath(), "config")) {
+                    include 'sputnik.config'
+                    include '*.key'
+                }
+                into new File(intoDir.toString(), "config")
+            }
+            copy {
+                from(new File(resourcePath(), 'server.sh'))
+                into intoDir
+            }
+        }
+    }
+
+    def copyResources = { intoDir ->
+        if(project.isCrossBuilding()) {
+            // TODO copy to Android project
+        } else {
+            copy {
+                // copy to bin folder of server
+                from new File(resourceCommonPath())
+                into new File(intoDir, "common")
+            }
+        }
+    }
+
+    task qmakeTask() {
+        doLast {
+            // run qmake
+            exec {
+                executable "qmake"
+                args "Test.pro"
+                workingDir testDir()
+            }
+            exec {
+                executable "make"
+                workingDir testDir()
+            }
+        }
+    }
+
+    task test(dependsOn:qmakeTask) {
+        doLast {
+            // copy test file to server directory
+            copy {
+                from("tests/data")
+                into binPath()
+            }
+
+            // Start our server
+            def processBuilder = new ProcessBuilder(["/bin/sh", "-c", "./server 8080 &"])
+            processBuilder.directory(new File(binPath()))
+            Map env = processBuilder.environment()
+            env.put("LD_LIBRARY_PATH", libsPath())
+            def process = processBuilder.redirectErrorStream(true).start()
+            process.inputStream.eachLine {println it}
+            // exec test app
+            try {
+                exec {
+                    executable "./Test"
+                    workingDir testDir()
+                }
+            } catch(Throwable t) {
+                println t
+            } finally {
+                println "Killing the server"
+                exec {
+                    executable "killall"
+                    args "-9", "server"
+                }
+            }
+        }
+    }
+
+    task setVersion(type:VersionTask) {
+        Properties props = project.ext.versionProps()
+        File vFile = new File(projectDir, ["WebService", "ServerVersion.h"].join(File.separator))
+        String revId = project.ext.latestRevisionId()
+
+        def vDefines = [SERVER_VERSION_STRING:props.getProperty('server.major.version'),
+                        SERVER_REVISION_ID:revId,
+                        SERVER_SOURCE_ID:new Date().format("yyyy-MM-dd HH:mm:ss.S")]
+        versionFile vFile
+        defines vDefines
+    }
+
+    task buildServer() {
+        doLast {
+            def distDir
+            String binDir
+            FileTree tree
+            if(project.isCrossBuilding()) {
+                distDir = new File(libsPath())
+                binDir =  ["${project.buildDir}", "binaries","serverSharedLibrary"].join(File.separator)
+                tree = fileTree(binDir) {
+                    include 'libserver.so'
+                }
+            } else {
+                distDir = new File(binPath())
+                binDir =  ["${project.buildDir}", "binaries","serverExecutable"].join(File.separator)
+                tree = fileTree(binDir) {
+                    include 'server'
+                }
+            }
+            tree.each {File file ->
+               copy {
+                   from file.toString()
+                   into distDir.toString()
+               }
+            }
+            copyConfig(distDir)
+            copyResources(distDir)
+        }
+    }
+
+    task releaseServer(type:ReleaseBinaryTask) {
+        File outputReleaseDir = new File(commonBuildPath(), project.ext.releasePath())
+        if(outputReleaseDir.exists())
+            println "Warning! ${outputReleaseDir} already exists"
+        def binariesToRelease = ["server"]
+        binariesForRelease binariesToRelease
+        binLocation binPath()
+        libsLocation libsPath()
+        outputPath outputReleaseDir.toString()
+        doLast {    
+            copyConfig(new File(outputReleaseDir, "bin"))
+            copyResources(new File(outputReleaseDir, "bin"))
+        }
+    }
+
+    if(!project.isCrossBuilding() && OperatingSystem.current().isMacOsX()) {
+        task installNameToolTask(type: InstallNameToolTask, dependsOn: buildServer) {
+            def libNames = ["server"] 
+            libsToOverride libNames
+        }
+
+        build.dependsOn(installNameToolTask)
+        installNameToolTask.dependsOn(assemble)
+    } else {
+        buildServer.dependsOn(assemble)
+        build.dependsOn(buildServer)
+    }
+}

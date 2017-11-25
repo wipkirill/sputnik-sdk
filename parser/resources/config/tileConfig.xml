@@ -1,0 +1,613 @@
+<configuration>
+	<property name="tilePlugin">
+		<property name="computedArea" type="string">computedArea</property>
+		<property name="stylegroup" type="string">stylegroup</property>
+		<property name="layers" type="objects">
+			<object>
+				<property name="layerName" type="string">pt_place</property>
+				<property name="layerType" type="string">point</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="place">
+						<value>country</value>
+						<value>state</value>
+                        <value>city</value>
+                        <value>town</value>
+                        <value>village</value>
+                        <value>hamlet</value>
+                        <value>suburb</value>
+                        <value>neighbourhood</value>
+                        <value>locality</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>place</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_waterway_river</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+						<value>river</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_waterway_canal</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+						<value>canal</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_waterway_stream</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+                        <value>stream</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_waterway_ditch</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+                        <value>ditch</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_waterway_drain</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+                        <value>drain</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_highway_motorway</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>motorway</value>
+						<value>trunk</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>highway</value>
+					<value>oneway</value>
+					<value>ref</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="highway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_highway_mainroad</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>primary</value>
+						<value>secondary</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>highway</value>
+					<value>oneway</value>
+					<value>ref</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="highway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_highway_minorroad</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>residential</value>
+						<value>unclassified</value>
+						<value>road</value>
+						<value>living_street</value>
+						<value>tertiary</value>
+						<value>tertiary_link</value>
+						<value>motorway_link</value>
+						<value>trunk_link</value>
+						<value>primary_link</value>
+						<value>secondary_link</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>highway</value>
+					<value>oneway</value>
+					<value>ref</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="highway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_highway_service</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>service</value>
+						<value>track</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>oneway</value>
+					<value>ref</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="highway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_highway_noauto</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>path</value>
+						<value>cycleway</value>
+						<value>footway</value>
+						<value>pedestrian</value>
+						<value>steps</value>
+						<value>bridleway</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>highway</value>
+					<value>oneway</value>
+					<value>ref</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="highway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">ln_railway</property>
+				<property name="layerType" type="string">line</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="railway">
+						<value>light_rail</value>
+						<value>subway</value>
+						<value>narrow_gauge</value>
+						<value>rail</value>
+						<value>tram</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>railway</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="stylegroup" />
+							<pair key="objectTag" value="railway" />
+							<pair key="function" value="styleGroupFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_building</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="building">
+						<value>*</value>
+					</entry>
+					<entry key="name">
+						<value>*</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>building</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_natural</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="natural">
+						<value>wood</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>natural</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+
+			<object>
+				<property name="layerName" type="string">pg_natural_water</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="natural">
+						<value>water</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>natural</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+
+			<object>
+				<property name="layerName" type="string">pg_natural_pond</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="natural">
+						<value>pond</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>natural</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+
+			<object>
+				<property name="layerName" type="string">pg_world_water</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray"/>
+				<property name="storeFields" type="array"/>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_water</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="waterway">
+						<value>basin</value>
+						<value>mill_pond</value>
+						<value>pond</value>
+						<value>riverbank</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>waterway</value>
+					<value>name</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_island</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="place">
+						<value>island</value>
+						<value>islet</value>	
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>place</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_leisure</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="leisure">
+						<value>common</value>
+						<value>golf_course</value>
+						<value>park</value>
+						<value>pitch</value>
+						<value>sports_centre</value>
+						<value>stadium</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>leisure</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_aeroway</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="aeroway">
+						<value>apron</value>
+						<value>runway</value>
+						<value>taxiway</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>aeroway</value>
+				</property>
+			</object>			
+			<object>
+				<property name="layerName" type="string">pg_landuse</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="landuse">
+						<value>cemetery</value>
+						<value>commercial</value>
+						<value>forest</value>
+						<value>grass</value>
+						<value>industrial</value>
+						<value>residential</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>landuse</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pg_amenity</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="amenity">
+						<value>college</value>
+						<value>hospital</value>
+						<value>parking</value>
+						<value>school</value>
+						<value>university</value>
+						<value>bank</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>amenity</value>
+					<value>name</value>
+				</property>
+				<property name="computedFields" type="objects">
+					<object>
+						<property name="fieldConfig" type="map">
+							<pair key="fieldName" value="computedArea" />
+							<pair key="function" value="areaFunction"/>
+						</property>
+					</object>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pt_amenity</property>
+				<property name="layerType" type="string">point</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="amenity">
+						<value>bank</value>
+						<value>fast_food</value>
+						<value>cafe</value>
+						<value>restaurant</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>amenity</value>
+					<value>name</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">pt_public_transport</property>
+				<property name="layerType" type="string">point</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="highway">
+						<value>bus_stop</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+				</property>
+			</object>
+		</property>
+		<property name="relationLayers" type="objects">
+			<object>
+				<property name="layerName" type="string">mpg_waterway_riverbank</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="type">
+						<value>multipolygon</value>
+					</entry>
+					<entry key="waterway">
+						<value>riverbank</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">mpg_waterway_river</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="type">
+						<value>multipolygon</value>
+					</entry>
+					<entry key="waterway">
+						<value>river</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>waterway</value>
+				</property>
+			</object>
+			<object>
+				<property name="layerName" type="string">mpg_natural_water</property>
+				<property name="layerType" type="string">polygon</property>
+				<property name="compress" type="boolean">true</property>
+				<property name="tagsWithValues" type="associativeArray">
+					<entry key="type">
+						<value>multipolygon</value>
+					</entry>
+					<entry key="natural">
+						<value>water</value>
+					</entry>
+				</property>
+				<property name="storeFields" type="array">
+					<value>name</value>
+					<value>natural</value>
+				</property>
+			</object>
+		</property>
+		<property name="styleGroup" type="map">
+			<pair key="trunk" value="motorway" />
+		    <pair key="motorway" value="motorway" />
+		    <pair key="primary" value="mainroad" />
+		    <pair key="secondary" value="mainroad" />
+		    <pair key="motorway_link" value="minorroad" />
+		    <pair key="trunk_link" value="minorroad" />
+		    <pair key="primary_link" value="minorroad" />
+		    <pair key="secondary_link" value="minorroad" />
+		    <pair key="tertiary" value="minorroad" />
+		    <pair key="tertiary_link" value="minorroad" />
+		    <pair key="residential" value="minorroad" />
+		    <pair key="unclassified" value="minorroad" />
+		    <pair key="road" value=" minorroad" />
+		    <pair key="living_street" value="minorroad" />
+		    <pair key="service" value="service" />
+		    <pair key="track" value="service" />
+		    <pair key="path" value="noauto" />
+		    <pair key="cycleway" value="noauto" />
+		    <pair key="footway" value="noauto" />
+		    <pair key="pedestrian" value="noauto" />
+		    <pair key="steps" value="noauto" />
+		    <pair key="bridleway" value="noauto" />
+		    <pair key="light_rail" value="railway" />
+		    <pair key="subway" value="railway" />
+		    <pair key="narrow_gauge" value="railway" />
+		    <pair key="rail" value="railway" />
+		    <pair key="tram" value="railway" />
+		</property>
+		<property name="nonSplittable" type="array">
+			<value>waterway</value>
+			<value>natural</value>
+		</property>
+	</property>
+
+
+</configuration>

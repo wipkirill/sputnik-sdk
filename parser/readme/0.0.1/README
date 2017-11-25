@@ -1,0 +1,49 @@
+Parser by UrbanLabs version 0.0.1
+
+This file describes UrbanLabs Parser software. The Parser is the simplest way 
+to transform OpenStreetMap(c) data into searchable, routable and viewable format. 
+You have full control which information is exported to an output SQlite database 
+(tile layers, routing, search tags). 
+
+The version 0.0.1 of the given software is a freely distributable developer edition 
+which can be used only for for review, demonstration and evaluation purposes.
+
+GETTING STARTED
+
+Untar a downloaded copy of the Parser by running:
+     tar -xhzvf parser-<verson>-<platform>.tgz
+     cd parser-<verson>
+
+Download some OSM PBF dumps first. They can be found on the websites like GEOFABRIK
+(http://www.geofabrik.de/).
+
+The Parser has this basic input syntax:
+     ./parser.sh INPUT_FILENAME OUTPUT_FILENAME [OPTIONS]
+The options include:
+     --pedestrian           pedestrian edge filter (only pedestrian edges to be parsed)
+     --highway              highway edge filter (only highway edges to be parsed)
+     --search               export information needed for searching osm objects
+     --routing              write routing information, without turn restrictions
+     --turnrestrictions     this option is only valid with routing enabled. it forces to create edges that obey turn restrictions
+     --tiles                dump information needed for rendering map tiles
+     --addressdecoder       preprocess addresses of object in order to give approximate addresses and autocompletion when giving partial addresses
+     --gtfs                 experimental public transport information/routing
+     --debug                increase logging level
+     --help                 print this message
+     --version              parser version
+
+
+Example usage:
+          ./parser.sh saarbruecken.pbf saar --highway --routing --turnrestrictions --search --tiles --addressdecoder
+
+This command outputs an SQlite database called 'saar' having saarbruecken.pbf as 
+an input map file. We have included routing information for cars(--highway) and
+considered turning restrictions. By using our Server tool you can also search for 
+OSM objects and render tiles. Further info under http://urbanlabs.in and find the 
+Server in Products.
+
+CREDITS
+     * libspatialindex by Marios Hadjieleftheriou, mhadji@gmail.com, http://libspatialindex.github.io/
+     * OpenStreetMap(c) community, http://wiki.openstreetmap.org/
+     * SQlite, http://www.sqlite.org/
+     * Mapnik, http://mapnik.org/
